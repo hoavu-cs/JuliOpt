@@ -1,0 +1,33 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.12.4"
+manifest_format = "2.0"
+project_hash = "2e65c065cc54d219ffde968f441b0f294e5bb231"
+
+[[deps.DataStructures]]
+deps = ["OrderedCollections"]
+git-tree-sha1 = "e357641bb3e0638d353c4b29ea0e40ea644066a6"
+uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+version = "0.19.3"
+
+[[deps.JuliOpt]]
+deps = ["DataStructures", "OffsetArrays"]
+path = "."
+uuid = "34f9d4c9-18ae-4c05-bb30-62f66462ffc3"
+version = "1.0.0-DEV"
+
+[[deps.OffsetArrays]]
+git-tree-sha1 = "117432e406b5c023f665fa73dc26e79ec3630151"
+uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+version = "1.17.0"
+
+    [deps.OffsetArrays.extensions]
+    OffsetArraysAdaptExt = "Adapt"
+
+    [deps.OffsetArrays.weakdeps]
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+
+[[deps.OrderedCollections]]
+git-tree-sha1 = "05868e21324cede2207c6f0f466b4bfef6d5e7ee"
+uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+version = "1.8.1"
