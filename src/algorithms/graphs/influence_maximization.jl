@@ -14,7 +14,7 @@ function simulate_ic(
 )
 
     total_activated = 0
-
+    
     for _ ∈ 1:n_simulations
         activated = Set(seed_set)
         newly_activated = Set(seed_set)
@@ -86,5 +86,16 @@ function influence_maximization_ic(
         current_spread += Δ
     end
 
-    return solution, current_spread
+    final_spread = simulate_ic(g, weights, solution, n_simulations)
+    return solution, final_spread
 end
+
+precompile(
+    influence_maximization_ic, 
+    (SimpleDiGraph, Dict{Tuple{Int, Int}, Float64}, Int, Int)
+)
+
+precompile(
+    simulate_ic, 
+    (SimpleDiGraph, Dict{Tuple{Int, Int}, Float64}, Vector{Int}, Int)
+)

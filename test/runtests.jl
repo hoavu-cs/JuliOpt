@@ -5,4 +5,5 @@ using JuliOpt
     include("knapsack_test.jl")
     include("bin_packing_test.jl")
     include("interval_scheduling_test.jl")
+    include("influence_maximization_test.jl")
 end
