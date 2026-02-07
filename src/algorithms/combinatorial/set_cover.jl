@@ -1,0 +1,49 @@
+"""
+    set_cover(universe::Vector{Int64}, subsets::Vector{Vector{Int64}}, costs::Vector{Float64})
+
+    Greedy approximation for the weighted set cover problem.
+    Selects subsets to cover every element in `universe` with minimum total cost.
+    Returns the total cost and the indices of the selected subsets.
+    Approximation guarantee: `O(ln(n))` where `n = |universe|`.
+"""
+function set_cover(subsets::Vector{Vector{Int64}}, costs::Vector{Float64})
+    m = length(subsets)
+    
+    universe = Set{Int64}()
+    for s in subsets
+        union!(universe, s)
+    end
+    
+    uncovered = copy(universe)
+    subset_sets = [Set(s) for s in subsets]
+    selected = Int64[]
+    total_cost = 0.0
+    used = falses(m)
+
+    while !isempty(uncovered) || count(used) == m
+        best_idx = 0
+        best_ratio = -Inf
+
+        for i in 1:m
+            used[i] && continue
+            num_newly_covered = length(uncovered ∩ subset_sets[i])
+            
+            ratio =  num_newly_covered / costs[i]
+            if num_newly_covered > 0 && ratio > best_ratio
+                best_ratio = ratio
+                best_idx = i
+            end
+        end
+
+        best_idx == 0 && break 
+
+        push!(selected, best_idx)
+        used[best_idx] = true
+        total_cost += costs[best_idx]
+        uncovered = setdiff(uncovered, subset_sets[best_idx])
+    end
+
+    return total_cost, sort!(selected)
+end
+
+precompile(set_cover, (Vector{Vector{Int64}}, Vector{Float64}))
