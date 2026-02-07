@@ -5,11 +5,15 @@ export bin_packing,
        ptas_knapsack,
        weighted_interval_scheduling,
        influence_maximization_ic,
-       simulate_ic
+       simulate_ic,
+       set_cover,
+       max_coverage
 
 include("algorithms/combinatorial/knapsack.jl")
 include("algorithms/combinatorial/bin_packing.jl")
 include("algorithms/combinatorial/interval_scheduling.jl")
 include("algorithms/graphs/influence_maximization.jl")
+include("algorithms/combinatorial/set_cover.jl")
+include("algorithms/combinatorial/max_coverage.jl")
 
 end

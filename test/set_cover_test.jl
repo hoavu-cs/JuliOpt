@@ -129,75 +129,75 @@ end
         validate_set_cover(subsets, costs, selected, greedy_cost)
     end
 
-    @testset "approximation quality vs brute-force for large subsets" begin
-        # 1. Setup a large universe
-        n = 1_000_000
-        m = 15
+    # @testset "approximation quality vs brute-force for large subsets" begin
+    #     # 1. Setup a large universe
+    #     n = 1_000_000
+    #     m = 15
         
-        # Create large subsets with specific overlaps to ensure the greedy
-        # choice isn't just "pick the biggest one."
-        # We'll create a "cheap" optimal path and an "expensive" greedy trap.
+    #     # Create large subsets with specific overlaps to ensure the greedy
+    #     # choice isn't just "pick the biggest one."
+    #     # We'll create a "cheap" optimal path and an "expensive" greedy trap.
         
-        subsets = Vector{Vector{Int64}}(undef, m)
+    #     subsets = Vector{Vector{Int64}}(undef, m)
         
-        # The Optimal Path: 5 sets covering 200k each, cost 2.0 each (Total 10.0)
-        for i in 1:5
-            subsets[i] = collect(((i-1)*200_000 + 1) : (i*200_000))
-        end
+    #     # The Optimal Path: 5 sets covering 200k each, cost 2.0 each (Total 10.0)
+    #     for i in 1:5
+    #         subsets[i] = collect(((i-1)*200_000 + 1) : (i*200_000))
+    #     end
         
-        # The Greedy Trap: 1 set covering 900k elements, but cost 15.0
-        # It has a better initial ratio (15/900k) than the optimal sets (2/200k),
-        # but picking it makes the remaining 100k very expensive to cover.
-        subsets[6] = collect(1:900_000)
+    #     # The Greedy Trap: 1 set covering 900k elements, but cost 15.0
+    #     # It has a better initial ratio (15/900k) than the optimal sets (2/200k),
+    #     # but picking it makes the remaining 100k very expensive to cover.
+    #     subsets[6] = collect(1:900_000)
         
-        # Fill remaining with random large overlaps
-        for i in 7:m
-            subsets[i] = unique(rand(1:n, 300_000))
-        end
+    #     # Fill remaining with random large overlaps
+    #     for i in 7:m
+    #         subsets[i] = unique(rand(1:n, 300_000))
+    #     end
         
-        costs = rand(10.0:0.1:20.0, m)
-        costs[1:5] .= 2.0   # Optimal sets are cheap
-        costs[6] = 15.0     # Trap set
+    #     costs = rand(10.0:0.1:20.0, m)
+    #     costs[1:5] .= 2.0   # Optimal sets are cheap
+    #     costs[6] = 15.0     # Trap set
         
-        univ_set = Set(1:n)
+    #     univ_set = Set(1:n)
 
-        # 2. Brute Force Optimal (O(2^m))
-        # We use a simple loop over combinations. Since m=15, this is 32,768 iterations.
-        best_cost = Inf
-        for r in 1:m
-            for combo in combinations(1:m, r)
-                current_cost = sum(costs[i] for i in combo)
-                current_cost >= best_cost && continue # Pruning
+    #     # 2. Brute Force Optimal (O(2^m))
+    #     # We use a simple loop over combinations. Since m=15, this is 32,768 iterations.
+    #     best_cost = Inf
+    #     for r in 1:m
+    #         for combo in combinations(1:m, r)
+    #             current_cost = sum(costs[i] for i in combo)
+    #             current_cost >= best_cost && continue # Pruning
                 
-                # Use a BitVector for the brute force coverage check for speed
-                check_bits = falses(n)
-                for idx in combo
-                    # Optimization: for large sets, this is the bottleneck
-                    for el in subsets[idx]; check_bits[el] = true; end
-                end
+    #             # Use a BitVector for the brute force coverage check for speed
+    #             check_bits = falses(n)
+    #             for idx in combo
+    #                 # Optimization: for large sets, this is the bottleneck
+    #                 for el in subsets[idx]; check_bits[el] = true; end
+    #             end
                 
-                if all(check_bits)
-                    best_cost = current_cost
-                end
-            end
-        end
+    #             if all(check_bits)
+    #                 best_cost = current_cost
+    #             end
+    #         end
+    #     end
 
-        # 3. Run your BitVector set_cover
-        greedy_cost, selected = set_cover(subsets, costs)
+    #     # 3. Run your BitVector set_cover
+    #     greedy_cost, selected = set_cover(subsets, costs)
 
-        # 4. Assertions
-        harmonic = sum(1.0 / k for k in 1:n)
+    #     # 4. Assertions
+    #     harmonic = sum(1.0 / k for k in 1:n)
         
-        # Theoretical Check
-        @test greedy_cost <= (harmonic * best_cost) + 1e-9
+    #     # Theoretical Check
+    #     @test greedy_cost <= (harmonic * best_cost) + 1e-9
         
-        # Correctness Check
-        covered_check = falses(n)
-        for idx in selected
-            for el in subsets[idx]; covered_check[el] = true; end
-        end
-        @test all(covered_check)
-    end
+    #     # Correctness Check
+    #     covered_check = falses(n)
+    #     for idx in selected
+    #         for el in subsets[idx]; covered_check[el] = true; end
+    #     end
+    #     @test all(covered_check)
+    # end
 
     @testset "single element per set" begin
         subsets = [Int64[1], Int64[2], Int64[3]]

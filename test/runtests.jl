@@ -6,4 +6,6 @@ using JuliOpt
     include("bin_packing_test.jl")
     include("interval_scheduling_test.jl")
     include("influence_maximization_test.jl")
+    include("set_cover_test.jl")
+    include("max_coverage_test.jl")
 end
