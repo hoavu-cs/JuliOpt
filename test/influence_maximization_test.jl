@@ -384,4 +384,45 @@ n_simulations = 10000
         @test spread >= best_single_spread  # k nodes should beat 1 node
     end
 
+
+    @testset "random graph: Erdős-Rényi with n=40, p=0.2" begin
+        using Random
+        Random.seed!(42)  # For reproducibility
+        
+        n = 40
+        edge_prob = 0.2
+        k = 5
+        
+        # Generate random directed graph
+        g = SimpleDiGraph(n)
+        weights = Dict{Tuple{Int, Int}, Float64}()
+        
+        for u in 1:n
+            for v in 1:n
+                if u != v && rand() < edge_prob
+                    add_edge!(g, u, v)
+                    weights[(u, v)] = rand()  # Random weight in [0, 1]
+                end
+            end
+        end
+        
+        # For random graphs of this size, brute force is infeasible (C(40,5) = 658,008)
+        # So we just test that the algorithm runs and produces reasonable output
+        solution, spread = influence_maximization_ic(g, weights, k, n_simulations ÷ 10, n_simulations)
+        
+        @test length(solution) <= k
+        @test length(solution) == length(unique(solution))  # No duplicates
+        @test all(1 <= v <= n for v in solution)  # All nodes in valid range
+        @test spread >= k  # At minimum, k seed nodes are activated
+        @test spread <= n  # Cannot exceed total number of nodes
+        
+        # Additional sanity check: single best node should give less spread than k nodes
+        best_single_spread = 0.0
+        for v in 1:n
+            single_spread = simulate_ic(g, weights, [v], n_simulations)
+            best_single_spread = max(best_single_spread, single_spread)
+        end
+        @test spread >= best_single_spread  # k nodes should beat 1 node
+    end
+
 end
