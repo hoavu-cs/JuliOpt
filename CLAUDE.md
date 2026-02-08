@@ -31,7 +31,7 @@ All source code lives in `src/`, organized by problem domain:
 
 - **`src/JuliOpt.jl`** — Module entry point. Exports 6 public functions and includes all algorithm files.
 - **`src/algorithms/combinatorial/`** — Knapsack (exact DP + PTAS), bin packing (Best-Fit Decreasing), weighted interval scheduling (DP + binary search).
-- **`src/algorithms/graphs/`** — Influence maximization using the Independent Cascade model with greedy seed selection and Monte Carlo simulation.
+- **`src/algorithms/graphs/`** — Influence maximization using the Independent Cascade model with greedy seed selection and Monte Carlo simulation. Densest subgraph (Goldberg's exact algorithm) and densest at-most-k-subgraph (degree-based pruning + brute force).
 
 Key design decisions:
 - All algorithms return a tuple of `(objective_value, selected_items)`.

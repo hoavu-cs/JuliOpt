@@ -248,3 +248,303 @@ const subgraph_density = JuliOpt.density
     end
 
 end
+
+@testset "Densest At-Most-K Subgraph Tests" begin
+    densest_at_most_k = JuliOpt.densest_at_most_k_subgraph
+
+    # Brute force reference implementation
+    function bf_densest_k(G, k)
+        best_d = 0.0
+        best_S = Int[]
+        for size in 1:min(k, nv(G))
+            for subset in combinations(1:nv(G), size)
+                d = subgraph_density(G, subset)
+                if d > best_d
+                    best_d = d
+                    best_S = subset
+                end
+            end
+        end
+        return best_S, best_d
+    end
+
+    @testset "k >= n delegates to densest_subgraph" begin
+        g = complete_graph(4)
+        result = densest_at_most_k(g, 5)
+        # When k >= n, delegates to densest_subgraph which returns 3-tuple
+        @test length(result) == 3
+        S, _, d = result
+        @test Set(S) == Set(1:4)
+        @test d ≈ 1.5 atol=1e-6
+    end
+
+    @testset "k == n delegates to densest_subgraph" begin
+        g = complete_graph(3)
+        result = densest_at_most_k(g, 3)
+        @test length(result) == 3
+        S, _, d = result
+        @test Set(S) == Set(1:3)
+        @test d ≈ 1.0 atol=1e-6
+    end
+
+    @testset "triangle K3, k=2" begin
+        g = SimpleGraph(3)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 1, 3)
+
+        S, d = densest_at_most_k(g, 2)
+        @test length(S) ≤ 2
+        @test d ≈ 0.5 atol=1e-6
+    end
+
+    @testset "complete graph K5, k=3" begin
+        g = complete_graph(5)
+        S, d = densest_at_most_k(g, 3)
+        @test length(S) ≤ 3
+        @test d ≈ 1.0 atol=1e-6  # any 3 vertices form K3: 3 edges / 3 = 1.0
+    end
+
+    @testset "complete graph K5, k=4" begin
+        g = complete_graph(5)
+        S, d = densest_at_most_k(g, 4)
+        @test length(S) ≤ 4
+        @test d ≈ 1.5 atol=1e-6  # any 4 vertices form K4: 6 edges / 4 = 1.5
+    end
+
+    @testset "K4 with pendant, k=4" begin
+        # K4 on {1,2,3,4}, vertex 5 connected only to 1
+        # Best k=4 is K4 with density 6/4 = 1.5
+        g = complete_graph(4)
+        add_vertex!(g)
+        add_edge!(g, 1, 5)
+
+        S, d = densest_at_most_k(g, 4)
+        @test length(S) ≤ 4
+        @test Set(S) == Set(1:4)
+        @test d ≈ 1.5 atol=1e-6
+    end
+
+    @testset "K4 with pendant, k=3" begin
+        g = complete_graph(4)
+        add_vertex!(g)
+        add_edge!(g, 1, 5)
+
+        S, d = densest_at_most_k(g, 3)
+        @test length(S) ≤ 3
+        @test d ≈ 1.0 atol=1e-6  # any 3 from K4 form K3
+    end
+
+    @testset "star graph, k=2" begin
+        # star_graph(5): vertex 1 center, edges to 2,3,4,5
+        # Best k=2: center + any leaf = 1 edge / 2 = 0.5
+        g = star_graph(5)
+        S, d = densest_at_most_k(g, 2)
+        @test length(S) ≤ 2
+        @test d ≈ 0.5 atol=1e-6
+        @test 1 in S  # center must be included
+    end
+
+    @testset "no edges, k=2" begin
+        g = SimpleGraph(4)
+        S, d = densest_at_most_k(g, 2)
+        @test d ≈ 0.0 atol=1e-6
+    end
+
+    @testset "single edge, k=1" begin
+        # Single vertex has no edges, density = 0
+        g = SimpleGraph(2)
+        add_edge!(g, 1, 2)
+        S, d = densest_at_most_k(g, 1)
+        @test d ≈ 0.0 atol=1e-6
+    end
+
+    @testset "K5+K3 bridge, k=5" begin
+        g = complete_graph(5)
+        for v in 6:8
+            add_vertex!(g)
+        end
+        add_edge!(g, 6, 7)
+        add_edge!(g, 7, 8)
+        add_edge!(g, 6, 8)
+        add_edge!(g, 5, 6)  # bridge
+
+        S, d = densest_at_most_k(g, 5)
+        @test length(S) ≤ 5
+        @test Set(S) == Set(1:5)
+        @test d ≈ 2.0 atol=1e-6
+    end
+
+    @testset "K5+K3 bridge, k=3" begin
+        g = complete_graph(5)
+        for v in 6:8
+            add_vertex!(g)
+        end
+        add_edge!(g, 6, 7)
+        add_edge!(g, 7, 8)
+        add_edge!(g, 6, 8)
+        add_edge!(g, 5, 6)
+
+        S, d = densest_at_most_k(g, 3)
+        @test length(S) ≤ 3
+        @test d ≈ 1.0 atol=1e-6  # any K3 gives density 1.0
+    end
+
+    @testset "cycle graph C6, k=4" begin
+        g = cycle_graph(6)
+        S, d = densest_at_most_k(g, 4)
+        _, bf_d = bf_densest_k(g, 4)
+        @test length(S) ≤ 4
+        @test d ≈ bf_d atol=1e-6
+    end
+
+    @testset "brute force: triangle + square sharing vertex" begin
+        # Triangle {1,2,3} + square {3,4,5,6} sharing vertex 3
+        g = SimpleGraph(6)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 1, 3)
+        add_edge!(g, 3, 4)
+        add_edge!(g, 4, 5)
+        add_edge!(g, 5, 6)
+        add_edge!(g, 4, 6)
+
+        for k in 1:5
+            S, d = densest_at_most_k(g, k)
+            _, bf_d = bf_densest_k(g, k)
+            @test length(S) ≤ k
+            @test d ≈ bf_d atol=1e-6
+        end
+    end
+
+    @testset "brute force: irregular graph" begin
+        g = SimpleGraph(8)
+        for (u, v) in [(1,2),(1,3),(1,5),(2,3),(2,4),(3,6),(4,5),(4,7),(5,8),(6,7),(6,8),(7,8)]
+            add_edge!(g, u, v)
+        end
+
+        for k in 1:7
+            S, d = densest_at_most_k(g, k)
+            _, bf_d = bf_densest_k(g, k)
+            @test length(S) ≤ k
+            @test d ≈ bf_d atol=1e-6
+        end
+    end
+
+    @testset "brute force: K_{3,4} chain graph" begin
+        g = SimpleGraph(14)
+        for a in 1:3, b in 4:7
+            add_edge!(g, a, b)
+        end
+        add_edge!(g, 8, 9)
+        add_edge!(g, 9, 10)
+        add_edge!(g, 8, 10)
+        add_edge!(g, 11, 12)
+        add_edge!(g, 12, 13)
+        add_edge!(g, 13, 14)
+        add_edge!(g, 14, 11)
+        add_edge!(g, 7, 8)
+        add_edge!(g, 10, 11)
+
+        for k in [3, 5, 7]
+            S, d = densest_at_most_k(g, k)
+            _, bf_d = bf_densest_k(g, k)
+            @test length(S) ≤ k
+            @test d ≈ bf_d atol=1e-6
+        end
+    end
+
+    @testset "brute force: random G(12, 0.3)" begin
+        Random.seed!(123)
+        g = SimpleGraph(12)
+        for i in 1:12, j in (i+1):12
+            if rand() < 0.3
+                add_edge!(g, i, j)
+            end
+        end
+
+        for k in [2, 4, 6, 8]
+            S, d = densest_at_most_k(g, k)
+            _, bf_d = bf_densest_k(g, k)
+            @test length(S) ≤ k
+            @test d ≈ bf_d atol=1e-6
+        end
+    end
+
+    @testset "planted K7 in random G(50, 0.1), k=5" begin
+        Random.seed!(99)
+        n = 50
+        clique_vertices = 1:7
+
+        g = SimpleGraph(n)
+        for i in 1:n, j in (i+1):n
+            if rand() < 0.1
+                add_edge!(g, i, j)
+            end
+        end
+
+        # Plant K7 on vertices 1..7
+        for i in clique_vertices, j in clique_vertices
+            i < j && add_edge!(g, i, j)
+        end
+
+        S, d = densest_at_most_k(g, 5)
+        @test length(S) ≤ 5
+
+        # Any 5 vertices from K7 form K5 with density C(5,2)/5 = 2.0
+        # The result should be at least as dense as that
+        k5_density = subgraph_density(g, collect(clique_vertices)[1:5])
+        @test d ≥ k5_density - 1e-6
+
+        # The selected vertices should come from the planted clique
+        @test issubset(Set(S), Set(clique_vertices))
+    end
+
+    @testset "damaged K6 and K5 planted in random G(100, 0.1), k=5" begin
+        Random.seed!(42)
+        n = 100
+        clique1 = collect(1:6)   # K6 with 5 edges removed
+        clique2 = collect(7:11)  # K5 with 4 edges removed
+
+        g = SimpleGraph(n)
+        for i in 1:n, j in (i+1):n
+            if rand() < 0.1
+                add_edge!(g, i, j)
+            end
+        end
+
+        # Plant K6 on vertices 1..6, then remove 5 random edges
+        k6_edges = [(i, j) for i in clique1 for j in clique1 if i < j]
+        for (i, j) in k6_edges
+            add_edge!(g, i, j)
+        end
+        Random.seed!(7)
+        for (i, j) in shuffle(k6_edges)[1:5]
+            rem_edge!(g, i, j)
+        end
+
+        # Plant K5 on vertices 7..11, then remove 4 random edges
+        k5_edges = [(i, j) for i in clique2 for j in clique2 if i < j]
+        for (i, j) in k5_edges
+            add_edge!(g, i, j)
+        end
+        Random.seed!(13)
+        for (i, j) in shuffle(k5_edges)[1:4]
+            rem_edge!(g, i, j)
+        end
+
+        S, d = densest_at_most_k(g, 5)
+        @test length(S) ≤ 5
+
+        # Brute force best 5-subset from the planted vertices (C(11,5) = 462)
+        planted = vcat(clique1, clique2)
+        best_planted_d = 0.0
+        for subset in combinations(planted, 5)
+            sd = subgraph_density(g, subset)
+            best_planted_d = max(best_planted_d, sd)
+        end
+
+        # Algorithm should find density at least as good as the best planted subset
+        @test d ≥ best_planted_d - 1e-6
+    end
+end
