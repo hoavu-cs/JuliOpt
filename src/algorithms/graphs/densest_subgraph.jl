@@ -92,6 +92,53 @@ function densest_subgraph(G::AbstractGraph, num_iterations::Int = 40, algorithm=
 end
 
 """
+    Charikar's peeling algorithm for densest subgraph. 
+    1/2-approximation.
+"""
+function densest_subgraph_peeling(G::AbstractGraph)
+    H = copy(G)
+    n = nv(H)
+
+    active = Set(1:n)
+    best_S = copy(active)
+    best_density = density(H, collect(best_S))
+    remaining = n
+
+    Δ = maximum(degree(H))
+    B = Dict(d => Set(v for v in vertices(H) if degree(H, v) == d) for d in 0:Δ)
+    d = 0
+
+    while remaining > 0
+        current_density = ne(H) / remaining
+        if current_density > best_density
+            best_density = current_density
+            best_S = copy(active)
+        end
+        
+        # Find the next minimum degree d
+        d > Δ && break
+        while isempty(B[d])
+            d += 1
+            d > Δ && break
+        end
+        d > Δ && break
+
+        v = pop!(B[d]) # Remove a minimum degree vertex v
+        for u in collect(neighbors(H, v))
+            du = degree(H, u)
+            rem_edge!(H, u, v)
+            delete!(B[du], u) 
+            push!(B[du - 1], u)
+        end
+        delete!(active, v)
+        d = max(d-1, 0)
+        remaining -= 1
+    end
+
+    return best_S, best_density
+end
+
+"""
     Densest at-most-k-subgraph problem: find a subset S of vertices with |S| ≤ k that maximizes density(S) = |E(S)|/|S|.
     We try all subsets of size ≤ k and pick the one with the highest density. 
     However, one can prune the original graph and speed up the search as follows.
