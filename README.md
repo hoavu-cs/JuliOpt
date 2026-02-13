@@ -125,7 +125,7 @@ g = complete_graph(5)
 add_vertex!(g)
 add_edge!(g, 1, 6)  # pendant vertex
 
-S, lambda, density = densest_subgraph(g)
+S, density = densest_subgraph(g)
 # S = [1, 2, 3, 4, 5], density = 2.0
 
 # Densest subgraph with at most k vertices
