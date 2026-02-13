@@ -57,7 +57,6 @@ end
 
     Returns (best_S, best_λ, best_density_est)
     - best_S: vertex ids (1..n) of the best subgraph found
-    - best_λ: last feasible λ from the search
     - best_density_est: density(best_S) = |E(S)|/|S|
 """
 function densest_subgraph(G::AbstractGraph, num_iterations::Int = 40, algorithm=:goldberg)
@@ -70,7 +69,7 @@ function densest_subgraph(G::AbstractGraph, num_iterations::Int = 40, algorithm=
     best_S = collect(1:n)
     best_λ = 0.0
 
-    for _ ∈ 1:num_iterations
+    while high - low ≥ 1/(n * (n - 1))
         mid = (low + high) / 2.0
 
         H, cap, s, t = create_aux_graph(G, mid)
@@ -89,7 +88,7 @@ function densest_subgraph(G::AbstractGraph, num_iterations::Int = 40, algorithm=
         end
     end
 
-    return best_S, best_λ, density(G, best_S)
+    return best_S, density(G, best_S)
 end
 
 """

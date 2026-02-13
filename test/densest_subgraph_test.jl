@@ -24,7 +24,7 @@ const subgraph_density = JuliOpt.density
         g = SimpleGraph(2)
         add_edge!(g, 1, 2)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ 0.5 atol=1e-6
         @test Set(S) == Set([1, 2])
     end
@@ -35,7 +35,7 @@ const subgraph_density = JuliOpt.density
         add_edge!(g, 2, 3)
         add_edge!(g, 1, 3)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set([1, 2, 3])
         @test d ≈ 1.0 atol=1e-6
     end
@@ -43,7 +43,7 @@ const subgraph_density = JuliOpt.density
     @testset "complete graph K4" begin
         g = complete_graph(4)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:4)
         @test d ≈ 1.5 atol=1e-6
     end
@@ -51,7 +51,7 @@ const subgraph_density = JuliOpt.density
     @testset "complete graph K5" begin
         g = complete_graph(5)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:5)
         @test d ≈ 2.0 atol=1e-6
     end
@@ -63,7 +63,7 @@ const subgraph_density = JuliOpt.density
         add_vertex!(g)
         add_edge!(g, 1, 5)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set([1, 2, 3, 4])
         @test d ≈ 1.5 atol=1e-6
     end
@@ -73,7 +73,7 @@ const subgraph_density = JuliOpt.density
         # density = 4/5 = 0.8
         g = star_graph(5)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ 0.8 atol=1e-6
         @test Set(S) == Set(1:5)
     end
@@ -82,7 +82,7 @@ const subgraph_density = JuliOpt.density
         g = cycle_graph(6)
         # 6 edges, 6 vertices → density = 1.0
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ 1.0 atol=1e-6
         @test Set(S) == Set(1:6)
     end
@@ -90,7 +90,7 @@ const subgraph_density = JuliOpt.density
     @testset "no edges" begin
         g = SimpleGraph(4)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ 0.0 atol=1e-6
     end
 
@@ -103,7 +103,7 @@ const subgraph_density = JuliOpt.density
         add_edge!(g, 1, 6)
         add_edge!(g, 2, 7)
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:5)
         @test d ≈ 2.0 atol=1e-6
     end
@@ -116,7 +116,7 @@ const subgraph_density = JuliOpt.density
             add_edge!(g, i - 5, i)
         end
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:5)
         @test d ≈ 2.0 atol=1e-6
     end
@@ -135,7 +135,7 @@ const subgraph_density = JuliOpt.density
         add_edge!(g, 6, 8)
         add_edge!(g, 5, 6)  # bridge
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:5)
         @test d ≈ 2.0 atol=1e-6
     end
@@ -170,7 +170,7 @@ const subgraph_density = JuliOpt.density
             end
         end
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test Set(S) == Set(1:7)
         @test d ≈ 12.0 / 7.0 atol=1e-6
         @test d ≈ best_d atol=1e-6
@@ -194,7 +194,7 @@ const subgraph_density = JuliOpt.density
             i < j && add_edge!(g, i, j)
         end
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
 
         # Returned density must match the density helper
         @test d ≈ subgraph_density(g, S) atol=1e-6
@@ -224,7 +224,7 @@ const subgraph_density = JuliOpt.density
             end
         end
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ best_d atol=1e-6
     end
 
@@ -243,7 +243,7 @@ const subgraph_density = JuliOpt.density
             end
         end
 
-        S, λ, d = densest_subgraph(g)
+        S, d = densest_subgraph(g)
         @test d ≈ best_d atol=1e-6
     end
 
@@ -415,7 +415,7 @@ end
             i < j && add_edge!(g, i, j)
         end
 
-        _, _, optimal = densest_subgraph(g)
+        _, optimal = densest_subgraph(g)
 
         S, d = densest_peeling(g)
         @test d ≥ optimal / 2 - 1e-6
@@ -486,19 +486,14 @@ end
 
     @testset "k >= n delegates to densest_subgraph" begin
         g = complete_graph(4)
-        result = densest_at_most_k(g, 5)
-        # When k >= n, delegates to densest_subgraph which returns 3-tuple
-        @test length(result) == 3
-        S, _, d = result
+        S, d = densest_at_most_k(g, 5)
         @test Set(S) == Set(1:4)
         @test d ≈ 1.5 atol=1e-6
     end
 
     @testset "k == n delegates to densest_subgraph" begin
         g = complete_graph(3)
-        result = densest_at_most_k(g, 3)
-        @test length(result) == 3
-        S, _, d = result
+        S, d = densest_at_most_k(g, 3)
         @test Set(S) == Set(1:3)
         @test d ≈ 1.0 atol=1e-6
     end
