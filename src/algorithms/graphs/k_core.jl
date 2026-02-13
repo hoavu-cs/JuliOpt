@@ -40,3 +40,5 @@ function k_core_decomposition(G::AbstractGraph)
 
     return core
 end
+
+precompile(k_core_decomposition, (SimpleGraph{Int},))
