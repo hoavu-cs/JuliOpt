@@ -43,6 +43,7 @@ julia --project -e 'using Pkg; Pkg.instantiate()'
 | `densest_subgraph(G)` | Densest Subgraph | Goldberg's algorithm (binary search + max-flow) | Exact |
 | `densest_subgraph_peeling(G)` | Densest Subgraph | Charikar's peeling algorithm | 1/2-approx |
 | `densest_at_most_k_subgraph(G, k)` | Densest At-Most-k Subgraph | Degree-based pruning + brute force | Heuristic |
+| `k_core_decomposition(G)` | K-Core Decomposition | Iterative peeling | Exact, O(m) |
 
 ## Usage
 
