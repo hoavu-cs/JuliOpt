@@ -55,9 +55,9 @@ end
 """
     Goldberg algorithm for densest subgraph. 
 
-    Returns (best_S, best_λ, best_density_est)
+    Returns (best_S, best_density)
     - best_S: vertex ids (1..n) of the best subgraph found
-    - best_density_est: density(best_S) = |E(S)|/|S|
+    - best_density: density(best_S) = |E(S)|/|S|
 """
 function densest_subgraph(G::AbstractGraph, num_iterations::Int = 40, algorithm=:goldberg)
     n = nv(G)
