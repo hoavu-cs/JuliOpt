@@ -51,8 +51,8 @@ using JuliOpt
         end
     end
 
-    @testset "complete graph K5" begin
-        g = complete_graph(5)
+    @testset "complete graph K5" begin  
+        g = complete_graph(5)       
         core = k_core_decomposition(g)
         for v in 1:5
             @test core[v] == 4
@@ -211,6 +211,52 @@ using JuliOpt
         @test core[3] == 1
         for v in 4:6
             @test core[v] == 2
+        end
+    end
+
+    @testset "complex graph with multiple cores" begin
+        g = SimpleGraph(15)
+        add_edge!(g, 1, 3)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 3, 4)
+        add_edge!(g, 3, 5)
+        add_edge!(g, 3, 8)
+        add_edge!(g, 6, 8)
+        add_edge!(g, 6, 10)
+        add_edge!(g, 6, 11)
+        add_edge!(g, 6, 9)
+        add_edge!(g, 7, 8)
+        add_edge!(g, 7, 9)
+        add_edge!(g, 8, 9)
+        add_edge!(g, 8, 10)
+        add_edge!(g, 9, 10)
+        add_edge!(g, 9, 14)
+        add_edge!(g, 10, 11)
+        add_edge!(g, 10, 13)
+        add_edge!(g, 10, 14)
+        add_edge!(g, 11, 12)
+        add_edge!(g, 13, 15)
+        add_edge!(g, 14, 15)
+
+        true_core = Dict(1 => 1, 
+                        2 => 1, 
+                        3 => 1,
+                        4 => 1,
+                        5 => 1,
+                        12 => 1,
+                        11 => 2,
+                        7 => 2,
+                        14 => 2,
+                        15 => 2,
+                        13 => 2,
+                        8 => 3,
+                        6 => 3,
+                        9 => 3,
+                        10 => 3)
+
+        core = k_core_decomposition(g)
+        for v in vertices(g)
+            @test core[v] == true_core[v]
         end
     end
 
