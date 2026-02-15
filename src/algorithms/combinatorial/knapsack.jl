@@ -1,17 +1,17 @@
 using OffsetArrays
 
 """
-    exact_knapsack(W::Int64, weights::Vector{Int64}, values::Vector{Int64})
+    exact_knapsack(W::Int, weights::Vector{Int}, values::Vector{Int})
 
     Exact value-based 0/1 knapsack.
     Returns the maximum achievable value within capacity `W`
     and the indices of the selected items. 
     Time/space complexity: `O(n * sum(values))`.  
 """
-function exact_knapsack(W::Int64, weights::Vector{Int64}, values::Vector{Int64})
+function exact_knapsack(W::Int, weights::Vector{Int}, values::Vector{Int})
     n = length(weights)
     V = sum(values)
-    INF = typemax(Int64) ÷ 2
+    INF = typemax(Int) ÷ 2
     
     dp = OffsetArray(fill(INF, n + 1, V + 1), 0:n, 0:V)
     dp[0, 0] = 0
@@ -31,7 +31,7 @@ function exact_knapsack(W::Int64, weights::Vector{Int64}, values::Vector{Int64})
     best_v = isnothing(best_v) ? 0 : best_v - 1  # adjust for 0-indexing
     
     # Backtrack
-    items = Int64[]
+    items = Int[]
     i, v = n, best_v
     while i > 0 && v > 0
         wi, vi = weights[i], values[i]
@@ -47,18 +47,18 @@ function exact_knapsack(W::Int64, weights::Vector{Int64}, values::Vector{Int64})
 end
 
 """
-    ptas_knapsack(W::Int64, epsilon::Float64,
-                  weights::AbstractVector{Int64},
-                  values::AbstractVector{Int64})
+    ptas_knapsack(W::Int, epsilon::Float64,
+                  weights::AbstractVector{Int},
+                  values::AbstractVector{Int})
 
     Value-scaling PTAS for 0/1 knapsack.
     Returns a `(1 - ε)`-approximate solution value
     and the indices of the selected items.
 """
-function ptas_knapsack(W::Int64, epsilon::Float64, weights::AbstractVector{Int64}, values::AbstractVector{Int64})
+function ptas_knapsack(W::Int, epsilon::Float64, weights::AbstractVector{Int}, values::AbstractVector{Int})
     n = length(weights)
     if n == 0
-        return 0, Int64[]
+        return 0, Int[]
     end
 
     max_value = maximum(values)
@@ -68,7 +68,7 @@ function ptas_knapsack(W::Int64, epsilon::Float64, weights::AbstractVector{Int64
         return exact_knapsack(W, weights, values)
     end
 
-    scaled_values = [floor(Int64, v / K) for v in values]
+    scaled_values = [floor(Int, v / K) for v in values]
 
     # if scaling collapsed everything to zero, fallback
     if sum(scaled_values) == 0
@@ -80,5 +80,5 @@ function ptas_knapsack(W::Int64, epsilon::Float64, weights::AbstractVector{Int64
     return actual_value, items
 end
 
-precompile(exact_knapsack, (Int64, Vector{Int64}, Vector{Int64}))
-precompile(ptas_knapsack, (Int64, Float64, Vector{Int64}, Vector{Int64}))
+precompile(exact_knapsack, (Int, Vector{Int}, Vector{Int}))
+precompile(ptas_knapsack, (Int, Float64, Vector{Int}, Vector{Int}))

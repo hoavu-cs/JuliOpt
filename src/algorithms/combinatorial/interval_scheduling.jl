@@ -6,13 +6,13 @@ using OffsetArrays
     returns the maximum achievable weight and the indices of the selected jobs.
     Time complexity: `O(n log n)`.
 """
-function weighted_interval_scheduling(start_times::Vector{Int64}, end_times::Vector{Int64}, weights::Vector{Int64})
+function weighted_interval_scheduling(start_times::Vector{Int}, end_times::Vector{Int}, weights::Vector{Int})
     jobs = [(i, start_times[i], end_times[i], weights[i]) for i in 1:length(start_times)]
     n = length(jobs)
     sort!(jobs, by = x -> x[3])  
     
     # p[i] = rightmost job compatible with job i (0 if none)
-    p = OffsetArray(zeros(Int64, n), 1:n)
+    p = OffsetArray(zeros(Int, n), 1:n)
     
     for i in 2:n
         s = 1
@@ -32,7 +32,7 @@ function weighted_interval_scheduling(start_times::Vector{Int64}, end_times::Vec
     end
     
     # dp[i] = max weight using first i jobs (0-indexed: 0 to n)
-    dp = OffsetArray(zeros(Int64, n + 1), 0:n)
+    dp = OffsetArray(zeros(Int, n + 1), 0:n)
     dp[0] = 0
     
     for i in 1:n
@@ -40,7 +40,7 @@ function weighted_interval_scheduling(start_times::Vector{Int64}, end_times::Vec
     end
     
     # Reconstruct solution
-    S = Int64[]
+    S = Int[]
     i = n
     while i ≥ 1 
         take = dp[p[i]] + jobs[i][4]
@@ -57,4 +57,4 @@ function weighted_interval_scheduling(start_times::Vector{Int64}, end_times::Vec
     return dp[n], S
 end
 
-precompile(weighted_interval_scheduling, (Vector{Int64}, Vector{Int64}, Vector{Int64}))
+precompile(weighted_interval_scheduling, (Vector{Int}, Vector{Int}, Vector{Int}))

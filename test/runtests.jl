@@ -10,4 +10,5 @@ using JuliOpt
     include("max_coverage_test.jl")
     include("densest_subgraph_test.jl")
     include("k_core_test.jl")
+    include("pagerank_test.jl")
 end

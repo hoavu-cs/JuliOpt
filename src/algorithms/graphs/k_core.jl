@@ -14,7 +14,7 @@ function k_core_decomposition(G::AbstractGraph)
 
     k = 0
     H = copy(G)
-    core = Dict{Int, Int}(v => degree(H, v) for v in vertices(H))
+    core = Dict{Int, Int}(v => degree(H, v) for v in vertices(H)) # map each vertex to core number
     Δ = maximum(degree(H))
     B = Dict(d => Set(v for v in vertices(H) if degree(H, v) == d) for d in 0:Δ)
     remaining = nv(H)

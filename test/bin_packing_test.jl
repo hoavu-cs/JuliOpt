@@ -8,7 +8,7 @@ function validate_bin_packing(items, bin_capacity, num_bins, bins)
     @test length(bins) == num_bins
     
     # each item appears exactly once
-    all_items = Int64[]
+    all_items = Int[]
     for bin in bins
         append!(all_items, bin)
     end
@@ -29,7 +29,7 @@ end
 
 @testset "Bin Packing" begin
     @testset "exact fit single bin" begin
-        items = Int64[3, 2, 5]
+        items = Int[3, 2, 5]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 1
@@ -37,7 +37,7 @@ end
     end
     
     @testset "single item per bin" begin
-        items = Int64[10, 10, 10]
+        items = Int[10, 10, 10]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 3
@@ -45,7 +45,7 @@ end
     end
     
     @testset "simple two bins" begin
-        items = Int64[7, 5, 8, 3]
+        items = Int[7, 5, 8, 3]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 3
@@ -53,7 +53,7 @@ end
     end
     
     @testset "all items fit one bin" begin
-        items = Int64[1, 2, 3, 4]
+        items = Int[1, 2, 3, 4]
         capacity = 20
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 1
@@ -61,7 +61,7 @@ end
     end
     
     @testset "empty items" begin
-        items = Int64[]
+        items = Int[]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 0
@@ -69,7 +69,7 @@ end
     end
     
     @testset "single item fits" begin
-        items = Int64[5]
+        items = Int[5]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 1
@@ -77,7 +77,7 @@ end
     end
     
     @testset "decreasing order advantage" begin
-        items = Int64[6, 6, 5, 5, 5, 4, 4, 4, 4]
+        items = Int[6, 6, 5, 5, 5, 4, 4, 4, 4]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         lb = lower_bound(items, capacity)
@@ -86,7 +86,7 @@ end
     end
     
     @testset "identical items" begin
-        items = Int64[3, 3, 3, 3, 3, 3]
+        items = Int[3, 3, 3, 3, 3, 3]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 2
@@ -94,7 +94,7 @@ end
     end
     
     @testset "many small items" begin
-        items = Int64[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        items = Int[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         capacity = 5
         num_bins, bins = bin_packing(items, capacity)
         @test num_bins == 2
@@ -102,7 +102,7 @@ end
     end
     
     @testset "near lower bound" begin
-        items = Int64[4, 4, 4, 4, 3, 3, 3, 3]
+        items = Int[4, 4, 4, 4, 3, 3, 3, 3]
         capacity = 10
         num_bins, bins = bin_packing(items, capacity)
         lb = lower_bound(items, capacity)
@@ -113,7 +113,7 @@ end
     end
     
     @testset "classic example" begin
-        items = Int64[6, 12, 3, 7, 5, 8, 2, 9]
+        items = Int[6, 12, 3, 7, 5, 8, 2, 9]
         capacity = 15
         num_bins, bins = bin_packing(items, capacity)
         lb = lower_bound(items, capacity)
@@ -122,7 +122,7 @@ end
     end
     
     @testset "worst case for FFD" begin
-        items = Int64[7, 7, 6, 6, 5, 5, 4, 4]
+        items = Int[7, 7, 6, 6, 5, 5, 4, 4]
         capacity = 13
         num_bins, bins = bin_packing(items, capacity)
         lb = lower_bound(items, capacity)

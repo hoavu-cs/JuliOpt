@@ -6,6 +6,8 @@ Claude is often used to generate test cases and some documentation, but the core
 
 There are some NP-Hard problems with no known polynomial-time approximation. For these, we try to come up with heuristics that help reduce the search space (such as in densest at-most-k-subgraph). Some are dealt with using parameterization. 
 
+We also utilize multi-threading for algorithms that can benefit from parallelism, such as influence maximization. 
+
 ## Installation
 
 ```julia
@@ -145,6 +147,32 @@ julia --project -e 'using JuliOpt; using Test; include("test/knapsack_test.jl")'
 
 # With threads (needed for influence maximization)
 julia --threads=auto --project -e 'using Pkg; Pkg.test()'
+```
+
+## Benchmarks for Thread Scaling
+
+### Influence Maximization
+
+| Threads | Median (ms) | Min (ms) | Speedup |
+|---------|-------------|----------|---------|
+| 1       | 7,111       | 7,095    | 1.0x    |
+| 2       | 3,788       | 3,725    | 1.9x    |
+| 4       | 2,006       | 1,994    | 3.5x    |
+| 8       | 1,695       | 1,578    | 4.2x    |
+
+### PageRank
+
+| Threads | Median (ms) | Min (ms) | Speedup |
+|---------|-------------|----------|---------|
+| 1       | 276         | 266      | 1.0x    |
+| 2       | 307         | 269      | 1.0x    |
+| 4       | 275         | 267      | 1.0x    |
+| 8       | 281         | 271      | 1.0x    |
+
+```bash
+# Run benchmarks
+julia --project benchmarks/influence_maximization_bench.jl
+julia --project benchmarks/pagerank_bench.jl
 ```
 
 ## Dependencies

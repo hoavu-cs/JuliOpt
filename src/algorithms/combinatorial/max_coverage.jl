@@ -1,18 +1,18 @@
 """
-    max_coverage(subsets::Vector{Vector{Int64}}, k::Int64)
+    max_coverage(subsets::Vector{Vector{Int}}, k::Int)
 
     Greedy approximation for the maximum coverage problem.
     Selects at most `k` subsets to maximize the number of covered elements.
     Returns the number of covered elements and the indices of the selected subsets.
     Approximation guarantee: `(1 - 1/e)` ≈ 0.632.
 """
-function max_coverage(subsets::Vector{Vector{Int64}}, k::Int64)
+function max_coverage(subsets::Vector{Vector{Int}}, k::Int)
     m = length(subsets)
     k = min(k, m)
 
     subset_sets = [Set(s) for s in subsets]
-    covered = Set{Int64}()
-    selected = Int64[]
+    covered = Set{Int}()
+    selected = Int[]
     used = falses(m)
 
     for _ in 1:k
@@ -38,4 +38,4 @@ function max_coverage(subsets::Vector{Vector{Int64}}, k::Int64)
     return length(covered), sort!(selected)
 end
 
-precompile(max_coverage, (Vector{Vector{Int64}}, Int64))
+precompile(max_coverage, (Vector{Vector{Int}}, Int))

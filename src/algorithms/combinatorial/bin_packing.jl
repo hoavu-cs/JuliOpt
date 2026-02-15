@@ -7,10 +7,10 @@ using DataStructures: SortedDict
     returns the number of bins used and the indices of items in each bin.
     Time complexity: `O(n log n)`.
 """
-function bin_packing(items::AbstractVector{Int64}, bin_capacity::Int64)
+function bin_packing(items::AbstractVector{Int}, bin_capacity::Int)
     n = length(items)
     if n == 0
-        return 0, Vector{Vector{Int64}}()
+        return 0, Vector{Vector{Int}}()
     end
     
     # Create (original_index, size) pairs and sort descending by size
@@ -18,10 +18,10 @@ function bin_packing(items::AbstractVector{Int64}, bin_capacity::Int64)
     sort!(items_sizes, by = x -> -x[2])
     
     # Track bins: each bin is a list of item indices
-    bins = Vector{Vector{Int64}}()
+    bins = Vector{Vector{Int}}()
     
     # SortedDict: remaining_capacity -> list of bin indices with that capacity
-    rem = SortedDict{Int64, Vector{Int64}}()
+    rem = SortedDict{Int, Vector{Int}}()
     
     for (idx, size) in items_sizes
         # Skip items that are too large (or handle as error)
@@ -48,15 +48,15 @@ function bin_packing(items::AbstractVector{Int64}, bin_capacity::Int64)
             push!(bins[bin_idx], idx)
             new_capacity = capacity - size
             if new_capacity > 0
-                push!(get!(rem, new_capacity, Int64[]), bin_idx)
+                push!(get!(rem, new_capacity, Int[]), bin_idx)
             end
         else
             # No existing bin can fit this item - create new bin
-            push!(bins, Int64[idx])
+            push!(bins, Int[idx])
             new_bin_idx = length(bins)
             new_capacity = bin_capacity - size
             if new_capacity > 0
-                push!(get!(rem, new_capacity, Int64[]), new_bin_idx)
+                push!(get!(rem, new_capacity, Int[]), new_bin_idx)
             end
         end
     end
@@ -64,4 +64,4 @@ function bin_packing(items::AbstractVector{Int64}, bin_capacity::Int64)
     return length(bins), bins
 end
 
-precompile(bin_packing, (Vector{Int64}, Int64))
+precompile(bin_packing, (Vector{Int}, Int))

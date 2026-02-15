@@ -11,11 +11,11 @@ function validate_set_cover(subsets, costs, selected, total_cost)
     # total cost matches
     @test total_cost ≈ sum(costs[i] for i in selected)
     # all elements covered
-    all_elements = Set{Int64}()
+    all_elements = Set{Int}()
     for s in subsets
         union!(all_elements, s)
     end
-    covered = Set{Int64}()
+    covered = Set{Int}()
     for i in selected
         union!(covered, subsets[i])
     end
@@ -24,43 +24,43 @@ end
 
 @testset "Set Cover" begin
     @testset "basic example" begin
-        subsets = [Int64[1, 2, 3], Int64[2, 4], Int64[3, 4, 5], Int64[5]]
+        subsets = [Int[1, 2, 3], Int[2, 4], Int[3, 4, 5], Int[5]]
         costs = Float64[3.0, 2.0, 3.0, 1.0]
         total_cost, selected = set_cover(subsets, costs)
         validate_set_cover(subsets, costs, selected, total_cost)
     end
 
     @testset "single set covers all" begin
-        subsets = [Int64[1, 2, 3], Int64[1], Int64[2, 3]]
+        subsets = [Int[1, 2, 3], Int[1], Int[2, 3]]
         costs = Float64[1.0, 5.0, 5.0]
         total_cost, selected = set_cover(subsets, costs)
         @test total_cost == 1.0
-        @test selected == Int64[1]
+        @test selected == Int[1]
         validate_set_cover(subsets, costs, selected, total_cost)
     end
 
     @testset "disjoint sets" begin
-        subsets = [Int64[1, 2], Int64[3, 4], Int64[5, 6]]
+        subsets = [Int[1, 2], Int[3, 4], Int[5, 6]]
         costs = Float64[1.0, 1.0, 1.0]
         total_cost, selected = set_cover(subsets, costs)
         @test total_cost == 3.0
-        @test sort(selected) == Int64[1, 2, 3]
+        @test sort(selected) == Int[1, 2, 3]
         validate_set_cover(subsets, costs, selected, total_cost)
     end
 
     @testset "greedy picks cost-effective sets" begin
         # set 1 covers all 4 elements for cost 4 (ratio 1.0)
         # sets 2,3 each cover 2 elements for cost 1 (ratio 2.0) and together cover all
-        subsets = [Int64[1, 2, 3, 4], Int64[1, 2], Int64[3, 4]]
+        subsets = [Int[1, 2, 3, 4], Int[1, 2], Int[3, 4]]
         costs = Float64[4.0, 1.0, 1.0]
         total_cost, selected = set_cover(subsets, costs)
         @test total_cost == 2.0
-        @test sort(selected) == Int64[2, 3]
+        @test sort(selected) == Int[2, 3]
         validate_set_cover(subsets, costs, selected, total_cost)
     end
 
     @testset "unit costs" begin
-        subsets = [Int64[1, 2, 3], Int64[4, 5], Int64[1, 4], Int64[2, 3, 5]]
+        subsets = [Int[1, 2, 3], Int[4, 5], Int[1, 4], Int[2, 3, 5]]
         costs = Float64[1.0, 1.0, 1.0, 1.0]
         total_cost, selected = set_cover(subsets, costs)
         @test length(selected) <= 3
@@ -68,20 +68,20 @@ end
     end
 
     @testset "identical sets picks cheapest" begin
-        subsets = [Int64[1, 2], Int64[1, 2], Int64[1, 2]]
+        subsets = [Int[1, 2], Int[1, 2], Int[1, 2]]
         costs = Float64[5.0, 2.0, 3.0]
         total_cost, selected = set_cover(subsets, costs)
         @test total_cost == 2.0
-        @test selected == Int64[2]
+        @test selected == Int[2]
     end
 
     @testset "large overlapping sets" begin
         subsets = [
-            Int64[1, 2, 3, 4, 5],
-            Int64[4, 5, 6, 7, 8],
-            Int64[7, 8, 9, 10],
-            Int64[1, 6, 9],
-            Int64[2, 3, 10]
+            Int[1, 2, 3, 4, 5],
+            Int[4, 5, 6, 7, 8],
+            Int[7, 8, 9, 10],
+            Int[1, 6, 9],
+            Int[2, 3, 10]
         ]
         costs = Float64[5.0, 5.0, 4.0, 3.0, 3.0]
         total_cost, selected = set_cover(subsets, costs)
@@ -90,18 +90,18 @@ end
 
     @testset "approximation quality vs brute force" begin
         subsets = [
-            Int64[1, 2],
-            Int64[3, 4],
-            Int64[5, 6],
-            Int64[1, 3, 5],
-            Int64[2, 4, 6],
-            Int64[1, 2, 3, 4, 5, 6]
+            Int[1, 2],
+            Int[3, 4],
+            Int[5, 6],
+            Int[1, 3, 5],
+            Int[2, 4, 6],
+            Int[1, 2, 3, 4, 5, 6]
         ]
         costs = Float64[2.0, 2.0, 2.0, 3.0, 3.0, 7.0]
         m = length(subsets)
 
         # derive universe from subsets
-        univ_set = Set{Int64}()
+        univ_set = Set{Int}()
         for s in subsets
             union!(univ_set, s)
         end
@@ -110,7 +110,7 @@ end
         best_cost = Inf
         for r in 1:m
             for combo in combinations(1:m, r)
-                covered = Set{Int64}()
+                covered = Set{Int}()
                 for i in combo
                     union!(covered, subsets[i])
                 end
@@ -138,7 +138,7 @@ end
     #     # choice isn't just "pick the biggest one."
     #     # We'll create a "cheap" optimal path and an "expensive" greedy trap.
         
-    #     subsets = Vector{Vector{Int64}}(undef, m)
+    #     subsets = Vector{Vector{Int}}(undef, m)
         
     #     # The Optimal Path: 5 sets covering 200k each, cost 2.0 each (Total 10.0)
     #     for i in 1:5
@@ -200,11 +200,11 @@ end
     # end
 
     @testset "single element per set" begin
-        subsets = [Int64[1], Int64[2], Int64[3]]
+        subsets = [Int[1], Int[2], Int[3]]
         costs = Float64[10.0, 20.0, 30.0]
         total_cost, selected = set_cover(subsets, costs)
         @test total_cost == 60.0
-        @test sort(selected) == Int64[1, 2, 3]
+        @test sort(selected) == Int[1, 2, 3]
         validate_set_cover(subsets, costs, selected, total_cost)
     end
 end

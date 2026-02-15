@@ -20,9 +20,9 @@ end
 @testset "Weighted Interval Scheduling" begin
 
     @testset "classic example" begin
-        starts = Int64[1, 2, 4, 6, 5, 7]
-        ends   = Int64[3, 5, 6, 7, 8, 9]
-        wts    = Int64[5, 6, 5, 4, 11, 2]
+        starts = Int[1, 2, 4, 6, 5, 7]
+        ends   = Int[3, 5, 6, 7, 8, 9]
+        wts    = Int[5, 6, 5, 4, 11, 2]
 
         opt, chosen = weighted_interval_scheduling(starts, ends, wts)
         @test opt == 17
@@ -30,19 +30,19 @@ end
     end
 
     @testset "single job" begin
-        starts = Int64[1]
-        ends   = Int64[2]
-        wts    = Int64[10]
+        starts = Int[1]
+        ends   = Int[2]
+        wts    = Int[10]
 
         opt, chosen = weighted_interval_scheduling(starts, ends, wts)
         @test opt == 10
-        @test chosen == Int64[1]
+        @test chosen == Int[1]
     end
 
     @testset "all overlapping" begin
-        starts = Int64[1, 1, 1]
-        ends   = Int64[5, 5, 5]
-        wts    = Int64[2, 10, 7]
+        starts = Int[1, 1, 1]
+        ends   = Int[5, 5, 5]
+        wts    = Int[2, 10, 7]
 
         opt, chosen = weighted_interval_scheduling(starts, ends, wts)
         @test opt == 10
@@ -50,9 +50,9 @@ end
     end
 
     @testset "touching endpoints allowed" begin
-        starts = Int64[1, 3, 6]
-        ends   = Int64[3, 6, 9]
-        wts    = Int64[5, 5, 5]
+        starts = Int[1, 3, 6]
+        ends   = Int[3, 6, 9]
+        wts    = Int[5, 5, 5]
 
         opt, chosen = weighted_interval_scheduling(starts, ends, wts)
         @test opt == 15
@@ -60,9 +60,9 @@ end
     end
 
     @testset "tie case" begin
-        starts = Int64[1, 3, 1]
-        ends   = Int64[3, 5, 5]
-        wts    = Int64[5, 5, 10]
+        starts = Int[1, 3, 1]
+        ends   = Int[3, 5, 5]
+        wts    = Int[5, 5, 10]
 
         opt, chosen = weighted_interval_scheduling(starts, ends, wts)
         @test opt == 10
