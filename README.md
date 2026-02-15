@@ -6,7 +6,7 @@ Claude is often used to generate test cases and some documentation, but the core
 
 There are some NP-Hard problems with no known polynomial-time approximation. For these, we try to come up with heuristics that help reduce the search space (such as in densest at-most-k-subgraph). Some are dealt with using parameterization. 
 
-We also utilize multi-threading for algorithms that can benefit from parallelism, such as influence maximization and PageRank.
+We also utilize multi-threading for algorithms that can benefit from parallelism. See the benchmarks section for some results.
 
 ## Installation
 
